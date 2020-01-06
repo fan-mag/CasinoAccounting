@@ -64,15 +64,46 @@ open class WebServiceApplication {
     @PutMapping("/accnt")
     fun changeUserBalance(@RequestHeader(name = "apikey", required = true) apikey: String,
                           @RequestHeader(name = "Content-Type", required = true) contentType: String,
-                          @RequestBody requestBody: String) : ResponseEntity<Any> {
+                          @RequestBody requestBody: String): ResponseEntity<Any> {
         try {
-            val amount = RequestProcess.bodyToAmount(requestBody)
-            if (!AmountProcess.changeZeroCheck(amount))
-                return ResponseEntity(Message(""), HttpStatus.UNPROCESSABLE_ENTITY)
-            AmountProcess.changeBalance(amount)
-        } catch (exception : Exception) {
+            val privilege = Auth.getUserPrivilege(apikey).level
+            when (privilege) {
+                15 -> {
+                    val amount = RequestProcess.bodyToAmount(requestBody)
+                    if (!AmountProcess.changeZeroCheck(amount))
+                        return ResponseEntity(Message("Can't change balance for user ${amount.login}"), HttpStatus.UNPROCESSABLE_ENTITY)
+                    val newAmount = AmountProcess.changeBalance(amount)
+                    return ResponseEntity(newAmount, HttpStatus.OK)
+                }
+                else -> return ResponseEntity(Message("You are not allowed to change balance"), HttpStatus.FORBIDDEN)
+            }
+        } catch (exception: Exception) {
             Exceptions.handle(exception, "Accounting")
         }
         return ResponseEntity("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR)
     }
+
+    @PostMapping("/accnt")
+    fun setUserBalance(@RequestHeader(name = "apikey", required = true) apikey: String,
+                       @RequestHeader(name = "Content-Type", required = true) contentType: String,
+                       @RequestBody requestBody: String): ResponseEntity<Any> {
+        try {
+            val privilege = Auth.getUserPrivilege(apikey).level
+            when (privilege) {
+                15 -> {
+                    val amount = RequestProcess.bodyToAmount(requestBody)
+                    if (!AmountProcess.zeroCheck(amount))
+                        return ResponseEntity(Message("Can't change balance for user ${amount.login}"), HttpStatus.UNPROCESSABLE_ENTITY)
+                    val newAmount = AmountProcess.setBalance(amount)
+                    return ResponseEntity(newAmount, HttpStatus.OK)
+                }
+                else -> return ResponseEntity(Message("You are not allowed to change balance"), HttpStatus.FORBIDDEN)
+            }
+        } catch (exception: Exception) {
+            Exceptions.handle(exception, "Accounting")
+        }
+        return ResponseEntity("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR)
+
+    }
+
 }

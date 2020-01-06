@@ -37,4 +37,16 @@ object Account {
         resultSet.close()
         return returnAmount
     }
+
+    fun setBalance(amount: Amount): Amount {
+        val query = "update users set balance = ? where login = ? returning balance"
+        val preparedStatement = Database.conn.prepareStatement(query)
+        preparedStatement.setLong(1, amount.amount)
+        preparedStatement.setString(2, amount.login)
+        val resultSet = preparedStatement.executeQuery()
+        resultSet.next()
+        val returnAmount = Amount(amount.login, resultSet.getLong("balance"))
+        resultSet.close()
+        return returnAmount
+    }
 }

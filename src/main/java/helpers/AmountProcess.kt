@@ -32,4 +32,16 @@ object AmountProcess {
         Logger.log(service = "Account", message = "New user ${newAmount.login} balance is ${newAmount.amount}")
         return newAmount
     }
+
+    fun zeroCheck(amount: Amount): Boolean {
+        Logger.log(service = "Account", message = "Checking that set amount ${amount.amount} is above zero")
+        return (amount.amount >= 0)
+    }
+
+    fun setBalance(amount: Amount): Amount {
+        Logger.log(service = "Account", message = "Set balance for user ${amount.login} to ${amount.amount}")
+        val newAmount = Account.setBalance(amount)
+        Logger.log(service = "Account", message = "New user ${newAmount.login} balance is ${newAmount.amount}")
+        return newAmount
+    }
 }
