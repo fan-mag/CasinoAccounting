@@ -1,72 +1,40 @@
 package helpers
 
-import CasinoLib.model.Privilege
+import CasinoLib.model.Amount
 
 object Account {
-    fun checkLogin(login: String?): Int {
-        val query = "select count(*) from users where login = ?"
+    fun getBalanceByLogin(login: String?): Amount {
+        val query = "select balance from users where login = ?"
         val preparedStatement = Database.conn.prepareStatement(query)
         preparedStatement.setString(1, login)
         val resultSet = preparedStatement.executeQuery()
         resultSet.next()
-        val count = resultSet.getInt("count")
+        val balance = resultSet.getLong("balance")
         resultSet.close()
-        return count
+        return Amount(login = login!!, amount = balance)
     }
 
-    fun checkLoginAndPassword(login: String?, password: String?): Boolean {
-        val query = "select password from users where login = ?"
-        val preparedStatement = Database.conn.prepareStatement(query)
-        preparedStatement.setString(1, login)
-        val resultSet = preparedStatement.executeQuery()
-        resultSet.next()
-        val databasePassword = resultSet.getString("password")
-        return (databasePassword == password)
-    }
-
-    fun getApikey(login: String?): String {
-        val query = "select apikey from users where login = ?"
-        val preparedStatement = Database.conn.prepareStatement(query)
-        preparedStatement.setString(1, login)
-        val resultSet = preparedStatement.executeQuery()
-        resultSet.next()
-        return resultSet.getString("apikey")
-    }
-
-    fun createUser(login: String?, password: String?): String {
-        val query = "insert into users (login, password) values (?, ?) returning apikey"
-        val preparedStatement = Database.conn.prepareStatement(query)
-        preparedStatement.setString(1, login)
-        preparedStatement.setString(2, password)
-        val resultSet = preparedStatement.executeQuery()
-        resultSet.next()
-        return resultSet.getString("apikey")
-    }
-
-    fun getPrivilege(apikey: String): Privilege {
-        val query = "select privilege, description from users u join privileges p on u.privilege = p.id where apikey = ?"
+    fun getBalanceByApikey(apikey: String): Amount {
+        val query = "select login, balance from users where apikey = ?"
         val preparedStatement = Database.conn.prepareStatement(query)
         preparedStatement.setString(1, apikey)
         val resultSet = preparedStatement.executeQuery()
-        if (resultSet.next())
-            return Privilege(resultSet.getInt("privilege"), resultSet.getString("description"))
-        else
-            return Privilege(0, "Invalid apikey")
+        resultSet.next()
+        val login = resultSet.getString("login")
+        val balance = resultSet.getLong("balance")
+        resultSet.close()
+        return Amount(login = login, amount = balance)
     }
 
-    fun deleteUserByApikey(apikey: String) {
-        val query = "delete from users where apikey = ?"
+    fun changeBalance(amount: Amount): Amount {
+        val query = "update users set balance = balance + (?) where login = ? returning balance"
         val preparedStatement = Database.conn.prepareStatement(query)
-        preparedStatement.setString(1, apikey)
-        preparedStatement.execute()
+        preparedStatement.setLong(1, amount.amount)
+        preparedStatement.setString(2, amount.login)
+        val resultSet = preparedStatement.executeQuery()
+        resultSet.next()
+        val returnAmount = Amount(amount.login, resultSet.getLong("balance"))
+        resultSet.close()
+        return returnAmount
     }
-
-    fun deleteUserByLogin(login: String) {
-        val query = "delete from users where login = ?"
-        val preparedStatement = Database.conn.prepareStatement(query)
-        preparedStatement.setString(1, login)
-        preparedStatement.execute()
-    }
-
-
 }
