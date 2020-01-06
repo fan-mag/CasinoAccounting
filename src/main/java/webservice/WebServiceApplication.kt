@@ -56,7 +56,7 @@ open class WebServiceApplication {
                 else -> return ResponseEntity(Message("Not implemented for level $privilege privilege"), HttpStatus.UNPROCESSABLE_ENTITY)
             }
         } catch (exception: Exception) {
-            Exceptions.handle(exception, "Accounting")
+            Exceptions.handle(exception, "Account")
         }
         return ResponseEntity("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR)
     }
@@ -66,6 +66,7 @@ open class WebServiceApplication {
                           @RequestHeader(name = "Content-Type", required = true) contentType: String,
                           @RequestBody requestBody: String): ResponseEntity<Any> {
         try {
+            if (!RequestProcess.validateContentType(contentType)) return ResponseEntity(Message("Wrong Content-Type header"), HttpStatus.BAD_REQUEST)
             val privilege = Auth.getUserPrivilege(apikey).level
             when (privilege) {
                 15 -> {
@@ -78,7 +79,7 @@ open class WebServiceApplication {
                 else -> return ResponseEntity(Message("You are not allowed to change balance"), HttpStatus.FORBIDDEN)
             }
         } catch (exception: Exception) {
-            Exceptions.handle(exception, "Accounting")
+            Exceptions.handle(exception, "Account")
         }
         return ResponseEntity("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR)
     }
@@ -88,6 +89,7 @@ open class WebServiceApplication {
                        @RequestHeader(name = "Content-Type", required = true) contentType: String,
                        @RequestBody requestBody: String): ResponseEntity<Any> {
         try {
+            if (!RequestProcess.validateContentType(contentType)) return ResponseEntity(Message("Wrong Content-Type header"), HttpStatus.BAD_REQUEST)
             val privilege = Auth.getUserPrivilege(apikey).level
             when (privilege) {
                 15 -> {
@@ -100,7 +102,7 @@ open class WebServiceApplication {
                 else -> return ResponseEntity(Message("You are not allowed to change balance"), HttpStatus.FORBIDDEN)
             }
         } catch (exception: Exception) {
-            Exceptions.handle(exception, "Accounting")
+            Exceptions.handle(exception, "Account")
         }
         return ResponseEntity("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR)
 
