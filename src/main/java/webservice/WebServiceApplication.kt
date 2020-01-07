@@ -1,5 +1,6 @@
 package webservice
 
+import CasinoLib.exceptions.WrongApikeyProvidedException
 import CasinoLib.helpers.Exceptions
 import CasinoLib.model.Amount
 import CasinoLib.model.Message
@@ -51,10 +52,13 @@ open class WebServiceApplication {
                         AmountProcess.getBalanceByLogin(login!!)
                     else
                         AmountProcess.getBalanceByApikey(apikey)
+                    if (amount.login == "N/A") return ResponseEntity(Message("Wrong Api Key provided"), HttpStatus.NOT_FOUND)
                     return ResponseEntity(amount, HttpStatus.OK)
                 }
                 else -> return ResponseEntity(Message("Not implemented for level $privilege privilege"), HttpStatus.UNPROCESSABLE_ENTITY)
             }
+        } catch (exception: WrongApikeyProvidedException) {
+            return ResponseEntity(Message("User with apikey not found"), HttpStatus.NOT_FOUND)
         } catch (exception: Exception) {
             Exceptions.handle(exception, "Account")
         }
@@ -74,6 +78,7 @@ open class WebServiceApplication {
                     if (!AmountProcess.changeZeroCheck(amount))
                         return ResponseEntity(Message("Can't change balance for user ${amount.login}"), HttpStatus.UNPROCESSABLE_ENTITY)
                     val newAmount = AmountProcess.changeBalance(amount)
+                    if (newAmount.login == "N/A") return ResponseEntity(Message("User with login ${amount.login} not found"), HttpStatus.NOT_FOUND)
                     return ResponseEntity(newAmount, HttpStatus.OK)
                 }
                 else -> return ResponseEntity(Message("You are not allowed to change balance"), HttpStatus.FORBIDDEN)
@@ -97,6 +102,7 @@ open class WebServiceApplication {
                     if (!AmountProcess.zeroCheck(amount))
                         return ResponseEntity(Message("Can't change balance for user ${amount.login}"), HttpStatus.UNPROCESSABLE_ENTITY)
                     val newAmount = AmountProcess.setBalance(amount)
+                    if (newAmount.login == "N/A") return ResponseEntity(Message("User with login ${amount.login} not found"), HttpStatus.NOT_FOUND)
                     return ResponseEntity(newAmount, HttpStatus.OK)
                 }
                 else -> return ResponseEntity(Message("You are not allowed to change balance"), HttpStatus.FORBIDDEN)

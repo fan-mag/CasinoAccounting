@@ -5,6 +5,7 @@ import CasinoLib.services.Logger
 import com.google.gson.Gson
 
 object RequestProcess {
+    @Throws(Exception::class)
     fun validateContentType(contentType: String?): Boolean {
         Logger.log(service = "Auth", message = "Validating Content-Type header: $contentType")
         if (contentType == null) return false
@@ -12,11 +13,13 @@ object RequestProcess {
         return true
     }
 
+    @Throws(Exception::class)
     fun isBodyNull(requestBody: String?) : Boolean {
         Logger.log(service = "Auth", message = "Checking if requestBody $requestBody is null")
         return (requestBody == null)
     }
 
+    @Throws(Exception::class)
     fun isParameterProvided(parameter: String?) : Boolean {
         return (parameter != null)
     }
