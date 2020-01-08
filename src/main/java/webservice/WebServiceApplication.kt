@@ -1,5 +1,6 @@
 package webservice
 
+import CasinoLib.exceptions.UserNotFoundException
 import CasinoLib.exceptions.WrongApikeyProvidedException
 import CasinoLib.helpers.Exceptions
 import CasinoLib.model.Amount
@@ -57,9 +58,11 @@ open class WebServiceApplication {
                 }
                 else -> return ResponseEntity(Message("Not implemented for level $privilege privilege"), HttpStatus.UNPROCESSABLE_ENTITY)
             }
-        } catch (exception: WrongApikeyProvidedException) {
-            return ResponseEntity(Message("User with apikey not found"), HttpStatus.NOT_FOUND)
         } catch (exception: Exception) {
+            when (exception) {
+                is WrongApikeyProvidedException -> return ResponseEntity(Message("User with apikey not found"), HttpStatus.NOT_FOUND)
+                is UserNotFoundException -> return ResponseEntity(Message("User not found"), HttpStatus.NOT_FOUND)
+            }
             Exceptions.handle(exception, "Account")
         }
         return ResponseEntity("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR)
@@ -84,9 +87,13 @@ open class WebServiceApplication {
                 else -> return ResponseEntity(Message("You are not allowed to change balance"), HttpStatus.FORBIDDEN)
             }
         } catch (exception: Exception) {
+            when (exception) {
+                is WrongApikeyProvidedException -> return ResponseEntity(Message("User with apikey not found"), HttpStatus.NOT_FOUND)
+                is UserNotFoundException -> return ResponseEntity(Message("User not found"), HttpStatus.NOT_FOUND)
+            }
             Exceptions.handle(exception, "Account")
+            return ResponseEntity("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR)
         }
-        return ResponseEntity("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
     @PostMapping("/accnt")
@@ -108,10 +115,12 @@ open class WebServiceApplication {
                 else -> return ResponseEntity(Message("You are not allowed to change balance"), HttpStatus.FORBIDDEN)
             }
         } catch (exception: Exception) {
+            when (exception) {
+                is WrongApikeyProvidedException -> return ResponseEntity(Message("User with apikey not found"), HttpStatus.NOT_FOUND)
+                is UserNotFoundException -> return ResponseEntity(Message("User not found"), HttpStatus.NOT_FOUND)
+            }
             Exceptions.handle(exception, "Account")
+            return ResponseEntity("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR)
         }
-        return ResponseEntity("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR)
-
     }
-
 }

@@ -13,6 +13,7 @@ object Account {
         resultSet.next()
         val balance = resultSet.getLong("balance")
         resultSet.close()
+        preparedStatement.close()
         return Amount(login = login!!, amount = balance)
     }
 
@@ -26,6 +27,7 @@ object Account {
         val login = resultSet.getString("login")
         val balance = resultSet.getLong("balance")
         resultSet.close()
+        preparedStatement.close()
         return Amount(login = login, amount = balance)
     }
 
@@ -39,6 +41,7 @@ object Account {
         resultSet.next()
         val returnAmount = Amount(amount.login, resultSet.getLong("balance"))
         resultSet.close()
+        preparedStatement.close()
         return returnAmount
     }
 
@@ -52,6 +55,7 @@ object Account {
         resultSet.next()
         val returnAmount = Amount(amount.login, resultSet.getLong("balance"))
         resultSet.close()
+        preparedStatement.close()
         return returnAmount
     }
 }
