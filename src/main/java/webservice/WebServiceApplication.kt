@@ -68,6 +68,7 @@ open class WebServiceApplication {
         return ResponseEntity("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
+
     @PutMapping("/accnt")
     fun changeUserBalance(@RequestHeader(name = "apikey", required = true) apikey: String,
                           @RequestHeader(name = "Content-Type", required = true) contentType: String,
